@@ -871,7 +871,67 @@ Theorem pm_3_4 : forall (p q : Prop), (impl (and p q) (impl p q)).
     exact (mp (impl (not (impl p q)) (impl p (not q))) (impl (and p q) (impl p q)) (pm_2_51 p q) (con2 (impl p q) (or (not p) (not q)))).
 Qed.
 
-(* TODO: Complete PM section 3 from 3.41 *)
+Theorem pm_3_41 : forall (p q r : Prop), (impl (impl p r) (impl (and p q) r)).
+    intros.
+    exact (mp (impl (and p q) p) (impl (impl p r) (impl (and p q) r)) (simpl p q) (syll (and p q) p r)).
+Qed.
+
+Theorem pm_3_42 : forall (p q r : Prop), (impl (impl q r) (impl (and p q) r)).
+    intros.
+    exact (mp (impl (and p q) q) (impl (impl q r) (impl (and p q) r)) (simpr p q) (syll (and p q) q r)).
+Qed.
+
+Theorem pm_3_43 : forall (p q r : Prop), (impl (and (impl p q) (impl p r)) (impl p (and q r))).
+    intros.
+    pose (S1 := (andd q r)).
+    pose (S2 := (mp (impl q (impl r (and q r))) (impl (impl p q) (impl p (impl r (and q r)))) S1 (syll2 p q (impl r (and q r))))).
+    pose (S3 := (sylli (impl p q) (impl p (impl r (and q r))) (impl (impl p r) (impl p (and q r))) S2 (pm_2_77 p r (and q r)))).
+    exact (mp (impl (impl p q) (impl (impl p r) (impl p (and q r)))) (impl (and (impl p q) (impl p r)) (impl p (and q r))) S3 (imp (impl p q) (impl p r) (impl p (and q r)))).
+Qed.
+
+Theorem pm_3_44 : forall (p q r : Prop), (impl (and (impl q p) (impl r p)) (impl (or q r) p)).
+    intros.
+    pose (S1 := (andsyll (not q) r p)).
+    pose (S2 := (sylli (and (impl (not q) r) (impl r p)) (impl (not q) p) (impl (impl q p) p) S1 (pm_2_6 q p))).
+    pose (S3 := (mp (impl (and (impl (not q) r) (impl r p)) (impl (impl q p) p)) (impl (impl (not q) r) (impl (impl r p) (impl (impl q p) p))) S2 (exp (impl (not q) r) (impl r p) (impl (impl q p) p)))).
+    pose (S4 := (sylli (impl (not q) r) (impl (impl r p) (impl (impl q p) p)) (impl (impl q p) (impl (impl r p) p)) S3 (comm (impl r p) (impl q p) p))).
+    pose (S5 := (sylli (impl (not q) r) (impl (impl q p) (impl (impl r p) p)) (impl (and (impl q p) (impl r p)) p) S4 (imp (impl q p) (impl r p) p))).
+    pose (S6 := (mp (impl (impl (not q) r) (impl (and (impl q p) (impl r p)) p)) (impl (and (impl q p) (impl r p)) (impl (impl (not q) r) p)) S5 (comm (impl (not q) r) (and (impl q p) (impl r p)) p))).
+    pose (S7 := (mp (impl (or q r) (impl (not q) r)) (impl (impl (impl (not q) r) p) (impl (or q r) p)) (pm_2_53 q r) (syll (or q r) (impl (not q) r) p))).
+    exact (sylli (and (impl q p) (impl r p)) (impl (impl (not q) r) p) (impl (or q r) p) S6 S7).
+Qed.
+
+Theorem intro_andr : forall (p q r : Prop), (impl (impl p q) (impl (and p r) (and q r))).
+    intros.
+    pose (S1 := (syll p q (not r))).
+    exact (sylli (impl p q) (impl (impl q (not r)) (impl p (not r))) (impl (and p r) (and q r)) S1 (con (impl q (not r)) (impl p (not r)))).
+Qed.
+
+Theorem pm_3_47 : forall (p q r s : Prop), (impl (and (impl p r) (impl q s)) (impl (and p q) (and r s))).
+    intros.
+    pose (S1 := (simpl (impl p r) (impl q s))).
+    pose (S2 := (sylli (and (impl p r) (impl q s)) (impl p r) (impl (and p q) (and r q)) S1 (intro_andr p r q))).
+    pose (S3 := (mp (impl (and r q) (and q r)) (impl (impl (and p q) (and r q)) (impl (and p q) (and q r))) (and_comm r q) (syll2 (and p q) (and r q) (and q r)))).
+    pose (S4 := (sylli (and (impl p r) (impl q s)) (impl (and p q) (and r q)) (impl (and p q) (and q r)) S2 S3)).
+    pose (S5 := (simpr (impl p r) (impl q s))).
+    pose (S6 := (sylli (and (impl p r) (impl q s)) (impl q s) (impl (and q r) (and s r)) S5 (intro_andr q s r))).
+    pose (S7 := (mp (impl (and s r) (and r s)) (impl (impl (and q r) (and s r)) (impl (and q r) (and r s))) (and_comm s r) (syll2 (and q r) (and s r) (and r s)))).
+    pose (S8 := (sylli (and (impl p r) (impl q s)) (impl (and q r) (and s r)) (impl (and q r) (and r s)) S6 S7)).
+    exact (mp (impl (and (impl p r) (impl q s)) (impl (and q r) (and r s))) (impl (and (impl p r) (impl q s)) (impl (and p q) (and r s))) S8 (mp (impl (and (impl p r) (impl q s)) (impl (and p q) (and q r))) (impl (impl (and (impl p r) (impl q s)) (impl (and q r) (and r s))) (impl (and (impl p r) (impl q s)) (impl (and p q) (and r s)))) S4 (sylldc (and (impl p r) (impl q s)) (and p q) (and q r) (and r s)))).
+Qed.
+
+Theorem pm_3_48 : forall (p q r s : Prop), (impl (and (impl p r) (impl q s)) (impl (or p q) (or r s))).
+    intros.
+    pose (S1 := (simpl (impl p r) (impl q s))).
+    pose (S2 := (sylli (and (impl p r) (impl q s)) (impl p r) (impl (or p q) (or r q)) S1 (or_subl q p r))).
+    pose (S3 := (mp (impl (or r q) (or q r)) (impl (impl (or p q) (or r q)) (impl (or p q) (or q r))) (or_comm r q) (syll2 (or p q) (or r q) (or q r)))).
+    pose (S4 := (sylli (and (impl p r) (impl q s)) (impl (or p q) (or r q)) (impl (or p q) (or q r)) S2 S3)).
+    pose (S5 := (simpr (impl p r) (impl q s))).
+    pose (S6 := (sylli (and (impl p r) (impl q s)) (impl q s) (impl (or q r) (or s r)) S5 (or_subl r q s))).
+    pose (S7 := (mp (impl (or s r) (or r s)) (impl (impl (or q r) (or s r)) (impl (or q r) (or r s))) (or_comm s r) (syll2 (or q r) (or s r) (or r s)))).
+    pose (S8 := (sylli (and (impl p r) (impl q s)) (impl (or q r) (or s r)) (impl (or q r) (or r s)) S6 S7)).
+    exact (mp (impl (and (impl p r) (impl q s)) (impl (or q r) (or r s))) (impl (and (impl p r) (impl q s)) (impl (or p q) (or r s))) S8 (mp (impl (and (impl p r) (impl q s)) (impl (or p q) (or q r))) (impl (impl (and (impl p r) (impl q s)) (impl (or q r) (or r s))) (impl (and (impl p r) (impl q s)) (impl (or p q) (or r s)))) S4 (sylldc (and (impl p r) (impl q s)) (or p q) (or q r) (or r s)))).
+Qed.
 
 (* PM Section 4 *)
 
