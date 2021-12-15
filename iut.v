@@ -938,7 +938,7 @@ Qed.
 (* Bidirectional implication *)
 Definition bi := fun (p q : Prop) => (and (impl p q) (impl q p)).
 
-(* TODO: Complete PM sections 4 and 5 *)
+(* TODO: Complete PM section 5 *)
 
 (* The type of classes. Any predicative type such as Set would do, but it would be confusing to use Set where we really mean a potentially proper class *)
 Axiom Class : Type.
@@ -951,21 +951,43 @@ Axiom all : forall (P : forall (x : Class), Prop), Prop.
 (* Existential quantification over sets *)
 Definition ex := fun (P : forall (x : Class), Prop) => (not (all (fun (x : Class) => (not (P x))))).
 
-(* Axiom of specialization. The hypothesis that the argument specialized for must be a set is what restricts the domain of discourse to sets *)
+(* Axiom of specialization, generalization, and quantified implication. The hypotheses that the argument must be a set for specialization, or need only apply to sets for generalization, is what restricts the domain of discourse to sets *)
 Axiom ax_spec : forall (P : forall (x : Class), Prop) (y : Class) (Vy : (is_set y)), (impl (all P) (P y)).
-
-(* Axioms of generalization and quantified implication. Axioms of free logic, in that they apply over all domains of discourse, in the presence of a suitable axiom of specialization *)
-Axiom ax_gen : forall (P : forall (x : Class), Prop) (Wp : forall (x : Class), (P x)), (all P).
+Axiom ax_gen : forall (P : forall (x : Class), Prop) (W : forall (y : Class) (Vy : (is_set y)), (P y)), (all P).
 Axiom ax_quant_impl : forall (p : Prop) (Q : forall (x : Class), Prop), (impl (all (fun (x : Class) => (impl p (Q x)))) (impl p (all Q))).
 
 (* PM Section 10 *)
+
+(* PM takes quanitfied disjunction as its axiom instead *)
+Theorem pm_10_12 : forall (p : Prop) (P : forall (x : Class), Prop), (impl (all (fun (x : Class) => (or p (P x)))) (or p (all P))).
+    intros.
+    pose (S1 := (id (all (fun (x : Class) => (or p (P x)))))).
+    assert (S2 : forall (y : Class) (Vy : (is_set x)), (impl (or p (P x))).
+    {
+        intros.
+        pose (S3 := (ax_spec (fun (x : Class) => (or p (P x))) y Vy)).
+    }
 
 Theorem pm_10_14 : forall (P Q : forall (x : Class), Prop) (y : Class) (Vy : (is_set y)), (impl (and (all P) (all Q)) (and (P y) (Q y))).
     intros.
     pose (S1 := (ax_spec P y Vy)).
     pose (S2 := (ax_spec Q y Vy)).
     pose (S3 := (andi (impl (all P) (P y)) (impl (all Q) (Q y)) S1 S2)).
-Admitted.
+    exact (mp (and (impl (all P) (P y)) (impl (all Q) (Q y))) (impl (and (all P) (all Q)) (and (P y) (Q y))) S3 (pm_3_47 (all P) (all Q) (P y) (Q y))).
+Qed.
+
+Theorem pm_10_2 : forall (p : Prop) (P : forall (x : Class), Prop), (bi (all (fun (x : Class) => (or p (P x)))) (or p (all P))).
+    intros.
+    assert (S1 : forall (x : Class) (Vx : (is_set x)), (impl (or p (all P)) (or p (P x)))).
+    {
+        intros.
+        exact (mp (impl (all P) (P x)) (impl (or p (all P)) (or p (P x))) (ax_spec P x Vx) (or_subr p (all P) (P x))).
+    }
+    pose (S2 := (ax_gen (fun (x : Class) => (impl (or p (all P)) (or p (P x)))) S1)).
+    pose (S3 := (mp (all (fun (x : Class) => (impl (or p (all P)) (or p (P x))))) (impl (or p (all P)) (all (fun (x : Class) => (or p (P x))))) S2 (ax_quant_impl (or p (all P)) (fun (x : Class) => (or p (P x)))))).
+    pose (S4 := (ax_quant_impl p P)).
+    exact (andi (impl (all (fun (x : Class) => (impl p (P x)))) (impl p (all P))) (impl (or p (all P)) (all (fun (x : Class) => (or p (P x))))) S4 S3).
+    Admitted.
 
 (* TODO: Complete PM section 10 *)
 
